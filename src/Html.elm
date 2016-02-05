@@ -121,6 +121,18 @@ addChild child parent =
       Text string
 
 
+{-| A method for adding an HTML children
+-}
+addChildren : List Html -> Html -> Html
+addChildren newChildren parent =
+  case parent of
+    Node name attrs children ->
+      (Node name attrs (List.append children newChildren))
+
+    Text string ->
+      Text string
+
+
 {-| render must be used once you have constructed your html object
 -}
 render : Html -> VirtualDom.Node
