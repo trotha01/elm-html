@@ -1,5 +1,7 @@
+module Main (..) where
 
-import Html exposing (Html, img)
+import VirtualDom
+import Html exposing (Html, img, render, addAttribute)
 import Html.Attributes exposing (src, style)
 import Time exposing (fps)
 import Window
@@ -7,23 +9,26 @@ import Window
 
 -- VIEW
 
+
 view : Int -> Html
 view n =
   img
-    [ src "http://elm-lang.org/imgs/yogi.jpg"
-    , style
-        [ ("width", toString n ++ "px")
-        , ("height", toString n ++ "px")
-        ]
-    ]
-    []
+    |> addAttribute (src "http://elm-lang.org/imgs/yogi.jpg")
+    |> addAttribute
+        (style
+          [ ( "width", toString n ++ "px" )
+          , ( "height", toString n ++ "px" )
+          ]
+        )
+
 
 
 -- SIGNALS
 
-main : Signal Html
+
+main : Signal VirtualDom.Node
 main =
-  Signal.map view size
+  Signal.map (view >> render) size
 
 
 size : Signal Int

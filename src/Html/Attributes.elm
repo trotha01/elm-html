@@ -1,27 +1,5 @@
-module Html.Attributes
-    ( key, style
-    , class, classList, id, title, hidden
-    , type', value, checked, placeholder, selected
-    , accept, acceptCharset, action, autocomplete, autofocus, autosave
-    , disabled, enctype, formaction, list, maxlength, minlength, method, multiple
-    , name, novalidate, pattern, readonly, required, size, for, form
-    , max, min, step
-    , cols, rows, wrap
-    , href, target, download, downloadAs, hreflang, media, ping, rel
-    , ismap, usemap, shape, coords
-    , src, height, width, alt
-    , autoplay, controls, loop, preload, poster, default, kind, srclang
-    , sandbox, seamless, srcdoc
-    , reversed, start
-    , align, colspan, rowspan, headers, scope
-    , async, charset, content, defer, httpEquiv, language, scoped
-    , accesskey, contenteditable, contextmenu, dir, draggable, dropzone
-    , itemprop, lang, spellcheck, tabindex
-    , challenge, keytype
-    , cite, datetime, pubdate, manifest
-    , property, attribute
-    )
-    where
+module Html.Attributes (key, style, class, classList, id, title, hidden, type', value, checked, placeholder, selected, accept, acceptCharset, action, autocomplete, autofocus, autosave, disabled, enctype, formaction, list, maxlength, minlength, method, multiple, name, novalidate, pattern, readonly, required, size, for, form, max, min, step, cols, rows, wrap, href, target, download, downloadAs, hreflang, media, ping, rel, ismap, usemap, shape, coords, src, height, width, alt, autoplay, controls, loop, preload, poster, default, kind, srclang, sandbox, seamless, srcdoc, reversed, start, align, colspan, rowspan, headers, scope, async, charset, content, defer, httpEquiv, language, scoped, accesskey, contenteditable, contextmenu, dir, draggable, dropzone, itemprop, lang, spellcheck, tabindex, challenge, keytype, cite, datetime, pubdate, manifest, property, attribute) where
+
 {-| Helper functions for HTML attributes. They are organized roughly by
 category. Each attribute is labeled with the HTML tags it can be used with, so
 just search the page for `video` if you want video stuff.
@@ -111,16 +89,16 @@ Pretty much all of the functions in `Html.Attributes` are defined with
 
 -}
 
-import Html exposing (Attribute)
+import Html exposing (Attribute, Html, addAttribute)
 import Json.Encode as Json
 import String
 import VirtualDom
 
+
 -- This library does not include low, high, or optimum because the idea of a
 -- `meter` is just too crazy.
-
-
 -- SPECIAL ATTRIBUTES
+
 
 {-| A special attribute that uniquely identifies a node during the diffing
 process. If you have a list of 20 items and want to remove the 4th one, adding
@@ -150,10 +128,10 @@ There is no `Html.Styles` module because best practices for working with HTML
 suggest that this should primarily be specified in CSS files. So the general
 recommendation is to use this function lightly.
 -}
-style : List (String, String) -> Attribute
+style : List ( String, String ) -> Attribute
 style props =
   props
-    |> List.map (\(key,value) -> (key, Json.string value))
+    |> List.map (\( key, value ) -> ( key, Json.string value ))
     |> Json.object
     |> property "style"
 
@@ -174,7 +152,7 @@ is paired with.
         ]
         [ text msg.content ]
 -}
-classList : List (String, Bool) -> Attribute
+classList : List ( String, Bool ) -> Attribute
 classList list =
   list
     |> List.filter snd
@@ -183,7 +161,9 @@ classList list =
     |> class
 
 
+
 -- CUSTOM ATTRIBUTES
+
 
 {-| Create arbitrary *properties*.
 
@@ -230,15 +210,19 @@ attribute =
   VirtualDom.attribute
 
 
+
 -- GLOBAL ATTRIBUTES
 
-{-| Often used with CSS to style elements with common properties. -}
+
+{-| Often used with CSS to style elements with common properties.
+-}
 class : String -> Attribute
 class name =
   stringProperty "className" name
 
 
-{-| Indicates the relevance of an element. -}
+{-| Indicates the relevance of an element.
+-}
 hidden : Bool -> Attribute
 hidden bool =
   boolProperty "hidden" bool
@@ -252,21 +236,26 @@ id name =
   stringProperty "id" name
 
 
-{-| Text to be displayed in a tooltip when hovering over the element. -}
+{-| Text to be displayed in a tooltip when hovering over the element.
+-}
 title : String -> Attribute
 title name =
   stringProperty "title" name
 
 
+
 -- LESS COMMON GLOBAL ATTRIBUTES
 
-{-| Defines a keyboard shortcut to activate or add focus to the element. -}
+
+{-| Defines a keyboard shortcut to activate or add focus to the element.
+-}
 accesskey : Char -> Attribute
 accesskey char =
   stringProperty "accessKey" (String.fromChar char)
 
 
-{-| Indicates whether the element's content is editable. -}
+{-| Indicates whether the element's content is editable.
+-}
 contenteditable : Bool -> Attribute
 contenteditable bool =
   boolProperty "contentEditable" bool
@@ -288,31 +277,35 @@ dir value =
   stringProperty "dir" value
 
 
-{-| Defines whether the element can be dragged. -}
+{-| Defines whether the element can be dragged.
+-}
 draggable : String -> Attribute
 draggable value =
   stringProperty "draggable" value
 
 
-{-| Indicates that the element accept the dropping of content on it. -}
+{-| Indicates that the element accept the dropping of content on it.
+-}
 dropzone : String -> Attribute
 dropzone value =
   stringProperty "dropzone" value
 
 
-{-|-}
+{-| -}
 itemprop : String -> Attribute
 itemprop value =
   stringProperty "itemprop" value
 
 
-{-| Defines the language used in the element. -}
+{-| Defines the language used in the element.
+-}
 lang : String -> Attribute
 lang value =
   stringProperty "lang" value
 
 
-{-| Indicates whether spell checking is allowed for the element. -}
+{-| Indicates whether spell checking is allowed for the element.
+-}
 spellcheck : Bool -> Attribute
 spellcheck bool =
   boolProperty "spellcheck" bool
@@ -326,9 +319,12 @@ tabindex n =
   stringProperty "tabIndex" (toString n)
 
 
+
 -- HEADER STUFF
 
-{-| Indicates that the `script` should be executed asynchronously. -}
+
+{-| Indicates that the `script` should be executed asynchronously.
+-}
 async : Bool -> Attribute
 async bool =
   boolProperty "async" bool
@@ -371,7 +367,8 @@ httpEquiv value =
   stringProperty "httpEquiv" value
 
 
-{-| Defines the script language used in a `script`. -}
+{-| Defines the script language used in a `script`.
+-}
 language : String -> Attribute
 language value =
   stringProperty "language" value
@@ -385,7 +382,9 @@ scoped bool =
   boolProperty "scoped" bool
 
 
+
 -- EMBEDDED CONTENT
+
 
 {-| The URL of the embeddable content. For `audio`, `embed`, `iframe`, `img`,
 `input`, `script`, `source`, `track`, and `video`.
@@ -419,9 +418,12 @@ alt value =
   stringProperty "alt" value
 
 
+
 -- AUDIO and VIDEO
 
-{-| The `audio` or `video` should play as soon as possible. -}
+
+{-| The `audio` or `video` should play as soon as possible.
+-}
 autoplay : Bool -> Attribute
 autoplay bool =
   boolProperty "autoplay" bool
@@ -443,7 +445,8 @@ loop bool =
   boolProperty "loop" bool
 
 
-{-| Control how much of an `audio` or `video` resource should be preloaded. -}
+{-| Control how much of an `audio` or `video` resource should be preloaded.
+-}
 preload : String -> Attribute
 preload value =
   stringProperty "preload" value
@@ -465,18 +468,16 @@ default bool =
   boolProperty "default" bool
 
 
-{-| Specifies the kind of text `track`. -}
+{-| Specifies the kind of text `track`.
+-}
 kind : String -> Attribute
 kind value =
   stringProperty "kind" value
 
 
-{-- TODO: maybe reintroduce once there's a better way to disambiguate imports
-{-| Specifies a user-readable title of the text `track`. -}
-label : String -> Attribute
-label value =
-  stringProperty "label" value
---}
+
+{- - TODO: maybe reintroduce once there's a better way to disambiguate imports -}
+
 
 {-| A two letter language code indicating the language of the `track` text data.
 -}
@@ -485,7 +486,9 @@ srclang value =
   stringProperty "srclang" value
 
 
+
 -- IFRAMES
+
 
 {-| A space separated list of security restrictions you'd like to lift for an
 `iframe`.
@@ -495,7 +498,8 @@ sandbox value =
   stringProperty "sandbox" value
 
 
-{-|  Make an `iframe` look like part of the containing document. -}
+{-| Make an `iframe` look like part of the containing document.
+-}
 seamless : Bool -> Attribute
 seamless bool =
   boolProperty "seamless" bool
@@ -509,7 +513,9 @@ srcdoc value =
   stringProperty "srcdoc" value
 
 
+
 -- INPUT
+
 
 {-| Defines the type of a `button`, `input`, `embed`, `object`, `script`,
 `source`, `style`, or `menu`.
@@ -527,7 +533,8 @@ value value =
   stringProperty "value" value
 
 
-{-| Indicates whether an `input` of type checkbox is checked. -}
+{-| Indicates whether an `input` of type checkbox is checked.
+-}
 checked : Bool -> Attribute
 checked bool =
   boolProperty "checked" bool
@@ -541,13 +548,16 @@ placeholder value =
   stringProperty "placeholder" value
 
 
-{-| Defines which `option` will be selected on page load. -}
+{-| Defines which `option` will be selected on page load.
+-}
 selected : Bool -> Attribute
 selected bool =
   boolProperty "selected" bool
 
 
+
 -- INPUT HELPERS
+
 
 {-| List of types the server accepts, typically a file type.
 For `form` and `input`.
@@ -576,7 +586,13 @@ completed by the browser.
 -}
 autocomplete : Bool -> Attribute
 autocomplete bool =
-  stringProperty "autocomplete" (if bool then "on" else "off")
+  stringProperty
+    "autocomplete"
+    (if bool then
+      "on"
+     else
+      "off"
+    )
 
 
 {-| The element should be automatically focused after the page loaded.
@@ -689,7 +705,8 @@ pattern value =
   stringProperty "pattern" value
 
 
-{-| Indicates whether an `input` or `textarea` can be edited. -}
+{-| Indicates whether an `input` or `textarea` can be edited.
+-}
 readonly : Bool -> Attribute
 readonly bool =
   boolProperty "readOnly" bool
@@ -729,7 +746,9 @@ form value =
   stringProperty "form" value
 
 
+
 -- RANGES
+
 
 {-| Indicates the maximum value allowed. When using an input of type number or
 date, the max value must be a number or date. For `input`, `meter`, and `progress`.
@@ -755,16 +774,19 @@ step n =
   stringProperty "step" n
 
 
+
 --------------------------
 
 
-{-| Defines the number of columns in a `textarea`. -}
+{-| Defines the number of columns in a `textarea`.
+-}
 cols : Int -> Attribute
 cols n =
   stringProperty "cols" (toString n)
 
 
-{-| Defines the number of rows in a `textarea`. -}
+{-| Defines the number of rows in a `textarea`.
+-}
 rows : Int -> Attribute
 rows n =
   stringProperty "rows" (toString n)
@@ -778,7 +800,9 @@ wrap value =
   stringProperty "wrap" value
 
 
+
 -- MAPS
+
 
 {-| When an `img` is a descendent of an `a` tag, the `ismap` attribute
 indicates that the click location should be added to the parent `a`'s href as
@@ -815,7 +839,9 @@ coords value =
   stringProperty "coords" value
 
 
+
 -- KEY GEN
+
 
 {-| A challenge string that is submitted along with the public key in a `keygen`.
 -}
@@ -832,7 +858,9 @@ keytype value =
   stringProperty "keytype" value
 
 
+
 -- REAL STUFF
+
 
 {-| Specifies the horizontal alignment of a `caption`, `col`, `colgroup`,
 `hr`, `iframe`, `img`, `table`, `tbody`,  `td`,  `tfoot`, `th`, `thead`, or
@@ -854,7 +882,9 @@ cite value =
 
 -- LINKS AND AREAS
 
-{-| The URL of a linked resource, such as `a`, `area`, `base`, or `link`. -}
+
+{-| The URL of a linked resource, such as `a`, `area`, `base`, or `link`.
+-}
 href : String -> Attribute
 href value =
   stringProperty "href" value
@@ -922,7 +952,9 @@ rel value =
   stringProperty "rel" value
 
 
+
 -- CRAZY STUFF
+
 
 {-| Indicates the date and time associated with the element.
 For `del`, `ins`, `time`.
@@ -940,7 +972,9 @@ pubdate value =
   stringProperty "pubdate" value
 
 
+
 -- ORDERED LISTS
+
 
 {-| Indicates whether an ordered list `ol` should be displayed in a descending
 order instead of a ascending.
@@ -958,7 +992,9 @@ start n =
   stringProperty "start" (toString n)
 
 
+
 -- TABLES
+
 
 {-| The colspan attribute defines the number of columns a cell should span.
 For `td` and `th`.
@@ -992,15 +1028,12 @@ scope value =
   stringProperty "scope" value
 
 
-{-| Specifies the URL of the cache manifest for an `html` tag. -}
+{-| Specifies the URL of the cache manifest for an `html` tag.
+-}
 manifest : String -> Attribute
 manifest value =
   stringProperty "manifest" value
 
 
-{-- TODO: maybe reintroduce once there's a better way to disambiguate imports
-{-| The number of columns a `col` or `colgroup` should span. -}
-span : Int -> Attribute
-span n =
-    stringProperty "span" (toString n)
---}
+
+{- - TODO: maybe reintroduce once there's a better way to disambiguate imports -}

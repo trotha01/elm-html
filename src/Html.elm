@@ -1,12 +1,13 @@
-module Html where
+module Html (..) where
+
 {-| This file is organized roughly in order of popularity. The tags which you'd
 expect to use frequently will be closer to the top.
 
 # Custom Nodes
-@docs text, node, Html, Attribute
+@docs text, node, Html, Attribute, addAttribute, render
 
 # Conversions
-@docs toElement, fromElement
+@docs toElement
 
 # Headers
 @docs h1, h2, h3, h4, h5, h6
@@ -70,12 +71,15 @@ import VirtualDom
 `VirtualDom.Node` in `evancz/virtual-dom` but that is not a super crucial
 detail.
 -}
-type alias Html = VirtualDom.Node
+type Html
+  = Node String (List Attribute) (List Html)
+  | Text String
 
 
 {-| Set attributes on your `Html`.
 -}
-type alias Attribute = VirtualDom.Property
+type alias Attribute =
+  VirtualDom.Property
 
 
 {-| General way to create HTML nodes. It is used to define all of the helper
@@ -90,7 +94,43 @@ is not covered by the helper functions in this library.
 -}
 node : String -> List Attribute -> List Html -> Html
 node =
-    VirtualDom.node
+  Node
+
+
+{-| A method for adding an HTML attribute
+-}
+addAttribute : Attribute -> Html -> Html
+addAttribute attr node =
+  case node of
+    Node name attrs children ->
+      (Node name (attr :: attrs) children)
+
+    Text string ->
+      Text string
+
+
+{-| A method for adding an HTML child
+-}
+addChild : Html -> Html -> Html
+addChild child parent =
+  case parent of
+    Node name attrs children ->
+      (Node name attrs (List.append children [ child ]))
+
+    Text string ->
+      Text string
+
+
+{-| render must be used once you have constructed your html object
+-}
+render : Html -> VirtualDom.Node
+render html =
+  case html of
+    Node name attributes children ->
+      VirtualDom.node name attributes (List.map render children)
+
+    Text string ->
+      VirtualDom.text string
 
 
 {-| Just put plain text in the DOM. It will escape the string so that it appears
@@ -100,292 +140,320 @@ exactly as you specify.
 -}
 text : String -> Html
 text =
-    VirtualDom.text
+  Text
+
+
+
+-- TODO: fix fromElement
 
 
 {-| Embed HTML in Elements. Useful if your app is written primarily with
 Elements, but you need to switch over to HTML for some small section.
 -}
 toElement : Int -> Int -> Html -> Element
-toElement =
-    VirtualDom.toElement
+toElement x y html =
+  VirtualDom.toElement x y (render html)
 
 
 {-| Embed Elements in HTML. Useful if you have some component written with
 Elements or that uses `collage` that you want to embed in a larger HTML
 component.
--}
 fromElement : Element -> Html
-fromElement =
-    VirtualDom.fromElement
+fromElement x y html =
+  VirtualDom.fromElement
+-}
+
 
 
 -- SECTIONS
 
+
 {-| Represents the content of an HTML document. There is only one `body`
 element in a document.
 -}
-body : List Attribute -> List Html -> Html
+body : Html
 body =
-  node "body"
+  node "body" [] []
 
 
 {-| Defines a section in a document.
 -}
-section : List Attribute -> List Html -> Html
+section : Html
 section =
-  node "section"
+  node "section" [] []
 
 
 {-| Defines a section that contains only navigation links.
 -}
-nav : List Attribute -> List Html -> Html
+nav : Html
 nav =
-  node "nav"
+  node "nav" [] []
 
 
 {-| Defines self-contained content that could exist independently of the rest
 of the content.
 -}
-article : List Attribute -> List Html -> Html
+article : Html
 article =
-  node "article"
+  node "article" [] []
 
 
 {-| Defines some content loosely related to the page content. If it is removed,
 the remaining content still makes sense.
 -}
-aside : List Attribute -> List Html -> Html
+aside : Html
 aside =
-  node "aside"
+  node "aside" [] []
 
 
-{-|-}
-h1 : List Attribute -> List Html -> Html
+{-| -}
+h1 : Html
 h1 =
-  node "h1"
+  node "h1" [] []
 
 
-{-|-}
-h2 : List Attribute -> List Html -> Html
+{-| -}
+h2 : Html
 h2 =
-  node "h2"
+  node "h2" [] []
 
 
-{-|-}
-h3 : List Attribute -> List Html -> Html
+{-| -}
+h3 : Html
 h3 =
-  node "h3"
+  node "h3" [] []
 
 
-{-|-}
-h4 : List Attribute -> List Html -> Html
+{-| -}
+h4 : Html
 h4 =
-  node "h4"
+  node "h4" [] []
 
 
-{-|-}
-h5 : List Attribute -> List Html -> Html
+{-| -}
+h5 : Html
 h5 =
-  node "h5"
+  node "h5" [] []
 
 
-{-|-}
-h6 : List Attribute -> List Html -> Html
+{-| -}
+h6 : Html
 h6 =
-  node "h6"
+  node "h6" [] []
 
 
 {-| Defines the header of a page or section. It often contains a logo, the
 title of the web site, and a navigational table of content.
 -}
-header : List Attribute -> List Html -> Html
+header : Html
 header =
-  node "header"
+  node "header" [] []
 
 
 {-| Defines the footer for a page or section. It often contains a copyright
 notice, some links to legal information, or addresses to give feedback.
 -}
-footer : List Attribute -> List Html -> Html
+footer : Html
 footer =
-  node "footer"
+  node "footer" [] []
 
 
-{-| Defines a section containing contact information. -}
-address : List Attribute -> List Html -> Html
+{-| Defines a section containing contact information.
+-}
+address : Html
 address =
-  node "address"
+  node "address" [] []
 
 
 {-| Defines the main or important content in the document. There is only one
 `main` element in the document.
 -}
-main' : List Attribute -> List Html -> Html
+main' : Html
 main' =
-  node "main"
+  node "main" [] []
+
 
 
 -- GROUPING CONTENT
 
-{-| Defines a portion that should be displayed as a paragraph. -}
-p : List Attribute -> List Html -> Html
+
+{-| Defines a portion that should be displayed as a paragraph.
+-}
+p : Html
 p =
-  node "p"
+  node "p" [] []
 
 
 {-| Represents a thematic break between paragraphs of a section or article or
 any longer content.
 -}
-hr : List Attribute -> List Html -> Html
+hr : Html
 hr =
-  node "hr"
+  node "hr" [] []
 
 
 {-| Indicates that its content is preformatted and that this format must be
 preserved.
 -}
-pre : List Attribute -> List Html -> Html
+pre : Html
 pre =
-  node "pre"
+  node "pre" [] []
 
 
-{-| Represents a content that is quoted from another source. -}
-blockquote : List Attribute -> List Html -> Html
+{-| Represents a content that is quoted from another source.
+-}
+blockquote : Html
 blockquote =
-  node "blockquote"
+  node "blockquote" [] []
 
 
-{-| Defines an ordered list of items. -}
-ol : List Attribute -> List Html -> Html
+{-| Defines an ordered list of items.
+-}
+ol : Html
 ol =
-  node "ol"
+  node "ol" [] []
 
 
-{-| Defines an unordered list of items. -}
-ul : List Attribute -> List Html -> Html
+{-| Defines an unordered list of items.
+-}
+ul : Html
 ul =
-  node "ul"
+  node "ul" [] []
 
 
-{-| Defines a item of an enumeration list. -}
-li : List Attribute -> List Html -> Html
+{-| Defines a item of an enumeration list.
+-}
+li : Html
 li =
-  node "li"
+  node "li" [] []
 
 
 {-| Defines a definition list, that is, a list of terms and their associated
 definitions.
 -}
-dl : List Attribute -> List Html -> Html
+dl : Html
 dl =
-  node "dl"
+  node "dl" [] []
 
 
-{-| Represents a term defined by the next `dd`. -}
-dt : List Attribute -> List Html -> Html
+{-| Represents a term defined by the next `dd`.
+-}
+dt : Html
 dt =
-  node "dt"
+  node "dt" [] []
 
 
-{-| Represents the definition of the terms immediately listed before it. -}
-dd : List Attribute -> List Html -> Html
+{-| Represents the definition of the terms immediately listed before it.
+-}
+dd : Html
 dd =
-  node "dd"
+  node "dd" [] []
 
 
-{-| Represents a figure illustrated as part of the document. -}
-figure : List Attribute -> List Html -> Html
+{-| Represents a figure illustrated as part of the document.
+-}
+figure : Html
 figure =
-  node "figure"
+  node "figure" [] []
 
 
-{-| Represents the legend of a figure. -}
-figcaption : List Attribute -> List Html -> Html
+{-| Represents the legend of a figure.
+-}
+figcaption : Html
 figcaption =
-  node "figcaption"
+  node "figcaption" [] []
 
 
-{-| Represents a generic container with no special meaning. -}
-div : List Attribute -> List Html -> Html
+{-| Represents a generic container with no special meaning.
+-}
+div : Html
 div =
-  node "div"
+  node "div" [] []
+
 
 
 -- TEXT LEVEL SEMANTIC
 
-{-| Represents a hyperlink, linking to another resource. -}
-a : List Attribute -> List Html -> Html
+
+{-| Represents a hyperlink, linking to another resource.
+-}
+a : Html
 a =
-  node "a"
+  node "a" [] []
 
 
-{-| Represents emphasized text, like a stress accent. -}
-em : List Attribute -> List Html -> Html
+{-| Represents emphasized text, like a stress accent.
+-}
+em : Html
 em =
-  node "em"
+  node "em" [] []
 
 
-{-| Represents especially important text. -}
-strong : List Attribute -> List Html -> Html
+{-| Represents especially important text.
+-}
+strong : Html
 strong =
-  node "strong"
+  node "strong" [] []
 
 
 {-| Represents a side comment, that is, text like a disclaimer or a
 copyright, which is not essential to the comprehension of the document.
 -}
-small : List Attribute -> List Html -> Html
+small : Html
 small =
-  node "small"
+  node "small" [] []
 
 
-{-| Represents content that is no longer accurate or relevant. -}
-s : List Attribute -> List Html -> Html
+{-| Represents content that is no longer accurate or relevant.
+-}
+s : Html
 s =
-  node "s"
+  node "s" [] []
 
 
-{-| Represents the title of a work. -}
-cite : List Attribute -> List Html -> Html
+{-| Represents the title of a work.
+-}
+cite : Html
 cite =
-  node "cite"
+  node "cite" [] []
 
 
-{-| Represents an inline quotation. -}
-q : List Attribute -> List Html -> Html
+{-| Represents an inline quotation.
+-}
+q : Html
 q =
-  node "q"
+  node "q" [] []
 
 
 {-| Represents a term whose definition is contained in its nearest ancestor
 content.
 -}
-dfn : List Attribute -> List Html -> Html
+dfn : Html
 dfn =
-  node "dfn"
+  node "dfn" [] []
 
 
 {-| Represents an abbreviation or an acronym; the expansion of the
 abbreviation can be represented in the title attribute.
 -}
-abbr : List Attribute -> List Html -> Html
+abbr : Html
 abbr =
-  node "abbr"
+  node "abbr" [] []
 
 
 {-| Represents a date and time value; the machine-readable equivalent can be
 represented in the datetime attribute.
 -}
-time : List Attribute -> List Html -> Html
+time : Html
 time =
-  node "time"
+  node "time" [] []
 
 
-{-| Represents computer code. -}
-code : List Attribute -> List Html -> Html
+{-| Represents computer code.
+-}
+code : Html
 code =
-  node "code"
+  node "code" [] []
 
 
 {-| Represents a variable. Specific cases where it should be used include an
@@ -393,70 +461,73 @@ actual mathematical expression or programming context, an identifier
 representing a constant, a symbol identifying a physical quantity, a function
 parameter, or a mere placeholder in prose.
 -}
-var : List Attribute -> List Html -> Html
+var : Html
 var =
-  node "var"
+  node "var" [] []
 
 
-{-| Represents the output of a program or a computer. -}
-samp : List Attribute -> List Html -> Html
+{-| Represents the output of a program or a computer.
+-}
+samp : Html
 samp =
-  node "samp"
+  node "samp" [] []
 
 
 {-| Represents user input, often from the keyboard, but not necessarily; it
 may represent other input, like transcribed voice commands.
 -}
-kbd : List Attribute -> List Html -> Html
+kbd : Html
 kbd =
-  node "kbd"
+  node "kbd" [] []
 
 
-{-| Represent a subscript. -}
-sub : List Attribute -> List Html -> Html
+{-| Represent a subscript.
+-}
+sub : Html
 sub =
-  node "sub"
+  node "sub" [] []
 
 
-{-| Represent a superscript. -}
-sup : List Attribute -> List Html -> Html
+{-| Represent a superscript.
+-}
+sup : Html
 sup =
-  node "sup"
+  node "sup" [] []
 
 
 {-| Represents some text in an alternate voice or mood, or at least of
 different quality, such as a taxonomic designation, a technical term, an
 idiomatic phrase, a thought, or a ship name.
 -}
-i : List Attribute -> List Html -> Html
+i : Html
 i =
-  node "i"
+  node "i" [] []
 
 
 {-| Represents a text which to which attention is drawn for utilitarian
 purposes. It doesn't convey extra importance and doesn't imply an alternate
 voice.
 -}
-b : List Attribute -> List Html -> Html
+b : Html
 b =
-  node "b"
+  node "b" [] []
 
 
 {-| Represents a non-textual annoatation for which the conventional
 presentation is underlining, such labeling the text as being misspelt or
 labeling a proper name in Chinese text.
 -}
-u : List Attribute -> List Html -> Html
+u : Html
 u =
-  node "u"
+  node "u" [] []
 
 
 {-| Represents text highlighted for reference purposes, that is for its
 relevance in another context.
 -}
-mark : List Attribute -> List Html -> Html
+mark : Html
 mark =
-  node "mark"
+  node "mark" [] []
 
 
 {-| Represents content to be marked with ruby annotations, short runs of text
@@ -464,364 +535,398 @@ presented alongside the text. This is often used in conjunction with East Asian
 language where the annotations act as a guide for pronunciation, like the
 Japanese furigana.
 -}
-ruby : List Attribute -> List Html -> Html
+ruby : Html
 ruby =
-  node "ruby"
+  node "ruby" [] []
 
 
-{-| Represents the text of a ruby annotation. -}
-rt : List Attribute -> List Html -> Html
+{-| Represents the text of a ruby annotation.
+-}
+rt : Html
 rt =
-  node "rt"
+  node "rt" [] []
 
 
 {-| Represents parenthesis around a ruby annotation, used to display the
 annotation in an alternate way by browsers not supporting the standard display
 for annotations.
 -}
-rp : List Attribute -> List Html -> Html
+rp : Html
 rp =
-  node "rp"
+  node "rp" [] []
 
 
 {-| Represents text that must be isolated from its surrounding for
 bidirectional text formatting. It allows embedding a span of text with a
 different, or unknown, directionality.
 -}
-bdi : List Attribute -> List Html -> Html
+bdi : Html
 bdi =
-  node "bdi"
+  node "bdi" [] []
 
 
 {-| Represents the directionality of its children, in order to explicitly
 override the Unicode bidirectional algorithm.
 -}
-bdo : List Attribute -> List Html -> Html
+bdo : Html
 bdo =
-  node "bdo"
+  node "bdo" [] []
 
 
 {-| Represents text with no specific meaning. This has to be used when no other
 text-semantic element conveys an adequate meaning, which, in this case, is
 often brought by global attributes like `class`, `lang`, or `dir`.
 -}
-span : List Attribute -> List Html -> Html
+span : Html
 span =
-  node "span"
+  node "span" [] []
 
 
-{-| Represents a line break. -}
-br : List Attribute -> List Html -> Html
+{-| Represents a line break.
+-}
+br : Html
 br =
-  node "br"
+  node "br" [] []
 
 
 {-| Represents a line break opportunity, that is a suggested point for
 wrapping text in order to improve readability of text split on several lines.
 -}
-wbr : List Attribute -> List Html -> Html
+wbr : Html
 wbr =
-  node "wbr"
+  node "wbr" [] []
+
 
 
 -- EDITS
 
-{-| Defines an addition to the document. -}
-ins : List Attribute -> List Html -> Html
+
+{-| Defines an addition to the document.
+-}
+ins : Html
 ins =
-  node "ins"
+  node "ins" [] []
 
 
-{-| Defines a removal from the document. -}
-del : List Attribute -> List Html -> Html
+{-| Defines a removal from the document.
+-}
+del : Html
 del =
-  node "del"
+  node "del" [] []
+
 
 
 -- EMBEDDED CONTENT
 
-{-| Represents an image. -}
-img : List Attribute -> List Html -> Html
+
+{-| Represents an image.
+-}
+img : Html
 img =
-  node "img"
+  node "img" [] []
 
 
-{-| Embedded an HTML document. -}
-iframe : List Attribute -> List Html -> Html
+{-| Embedded an HTML document.
+-}
+iframe : Html
 iframe =
-  node "iframe"
+  node "iframe" [] []
 
 
 {-| Represents a integration point for an external, often non-HTML,
 application or interactive content.
 -}
-embed : List Attribute -> List Html -> Html
+embed : Html
 embed =
-  node "embed"
+  node "embed" [] []
 
 
 {-| Represents an external resource, which is treated as an image, an HTML
 sub-document, or an external resource to be processed by a plug-in.
 -}
-object : List Attribute -> List Html -> Html
+object : Html
 object =
-  node "object"
+  node "object" [] []
 
 
-{-| Defines parameters for use by plug-ins invoked by `object` elements. -}
-param : List Attribute -> List Html -> Html
+{-| Defines parameters for use by plug-ins invoked by `object` elements.
+-}
+param : Html
 param =
-  node "param"
+  node "param" [] []
 
 
-{-| Represents a video, the associated audio and captions, and controls. -}
-video : List Attribute -> List Html -> Html
+{-| Represents a video, the associated audio and captions, and controls.
+-}
+video : Html
 video =
-  node "video"
+  node "video" [] []
 
 
-{-| Represents a sound or audio stream. -}
-audio : List Attribute -> List Html -> Html
+{-| Represents a sound or audio stream.
+-}
+audio : Html
 audio =
-  node "audio"
+  node "audio" [] []
 
 
 {-| Allows authors to specify alternative media resources for media elements
 like `video` or `audio`.
 -}
-source : List Attribute -> List Html -> Html
+source : Html
 source =
-  node "source"
+  node "source" [] []
 
 
 {-| Allows authors to specify timed text track for media elements like `video`
 or `audio`.
 -}
-track : List Attribute -> List Html -> Html
+track : Html
 track =
-  node "track"
+  node "track" [] []
 
 
-{-| Represents a bitmap area for graphics rendering. -}
-canvas : List Attribute -> List Html -> Html
+{-| Represents a bitmap area for graphics rendering.
+-}
+canvas : Html
 canvas =
-  node "canvas"
+  node "canvas" [] []
 
 
-{-- TODO: get a better way to disambiguate imports
-          then expose these functions
-{-| In conjunction with `area`, defines an image map. -}
-map : List Attribute -> List Html -> Html
-map =
-node "map"
+
+{- - TODO: get a better way to disambiguate imports
+then expose these functions
+-}
 
 
-{-| In conjunction with `map`, defines an image map. -}
-area : List Attribute -> List Html -> Html
-area =
-node "area"
-
---}
-
-{-| Defines an embedded vectorial image. -}
-svg : List Attribute -> List Html -> Html
+{-| Defines an embedded vectorial image.
+-}
+svg : Html
 svg =
-  node "svg"
+  node "svg" [] []
 
 
-{-| Defines a mathematical formula. -}
-math : List Attribute -> List Html -> Html
+{-| Defines a mathematical formula.
+-}
+math : Html
 math =
-  node "math"
+  node "math" [] []
+
 
 
 -- TABULAR DATA
 
-{-| Represents data with more than one dimension. -}
-table : List Attribute -> List Html -> Html
+
+{-| Represents data with more than one dimension.
+-}
+table : Html
 table =
-  node "table"
+  node "table" [] []
 
 
-{-| Represents the title of a table. -}
-caption : List Attribute -> List Html -> Html
+{-| Represents the title of a table.
+-}
+caption : Html
 caption =
-  node "caption"
+  node "caption" [] []
 
 
-{-| Represents a set of one or more columns of a table. -}
-colgroup : List Attribute -> List Html -> Html
+{-| Represents a set of one or more columns of a table.
+-}
+colgroup : Html
 colgroup =
-  node "colgroup"
+  node "colgroup" [] []
 
 
-{-| Represents a column of a table. -}
-col : List Attribute -> List Html -> Html
+{-| Represents a column of a table.
+-}
+col : Html
 col =
-  node "col"
+  node "col" [] []
 
 
 {-| Represents the block of rows that describes the concrete data of a table.
 -}
-tbody : List Attribute -> List Html -> Html
+tbody : Html
 tbody =
-  node "tbody"
+  node "tbody" [] []
 
 
 {-| Represents the block of rows that describes the column labels of a table.
 -}
-thead : List Attribute -> List Html -> Html
+thead : Html
 thead =
-  node "thead"
+  node "thead" [] []
 
 
 {-| Represents the block of rows that describes the column summaries of a table.
 -}
-tfoot : List Attribute -> List Html -> Html
+tfoot : Html
 tfoot =
-  node "tfoot"
+  node "tfoot" [] []
 
 
-{-| Represents a row of cells in a table. -}
-tr : List Attribute -> List Html -> Html
+{-| Represents a row of cells in a table.
+-}
+tr : Html
 tr =
-  node "tr"
+  node "tr" [] []
 
 
-{-| Represents a data cell in a table. -}
-td : List Attribute -> List Html -> Html
+{-| Represents a data cell in a table.
+-}
+td : Html
 td =
-  node "td"
+  node "td" [] []
 
 
-{-| Represents a header cell in a table. -}
-th : List Attribute -> List Html -> Html
+{-| Represents a header cell in a table.
+-}
+th : Html
 th =
-  node "th"
+  node "th" [] []
+
 
 
 -- FORMS
 
+
 {-| Represents a form, consisting of controls, that can be submitted to a
 server for processing.
 -}
-form : List Attribute -> List Html -> Html
+form : Html
 form =
-  node "form"
+  node "form" [] []
 
 
-{-| Represents a set of controls. -}
-fieldset : List Attribute -> List Html -> Html
+{-| Represents a set of controls.
+-}
+fieldset : Html
 fieldset =
-  node "fieldset"
+  node "fieldset" [] []
 
 
-{-| Represents the caption for a `fieldset`. -}
-legend : List Attribute -> List Html -> Html
+{-| Represents the caption for a `fieldset`.
+-}
+legend : Html
 legend =
-  node "legend"
+  node "legend" [] []
 
 
-{-| Represents the caption of a form control. -}
-label : List Attribute -> List Html -> Html
+{-| Represents the caption of a form control.
+-}
+label : Html
 label =
-  node "label"
+  node "label" [] []
 
 
-{-| Represents a typed data field allowing the user to edit the data. -}
-input : List Attribute -> List Html -> Html
+{-| Represents a typed data field allowing the user to edit the data.
+-}
+input : Html
 input =
-  node "input"
+  node "input" [] []
 
 
-{-| Represents a button. -}
-button : List Attribute -> List Html -> Html
+{-| Represents a button.
+-}
+button : Html
 button =
-  node "button"
+  node "button" [] []
 
 
-{-| Represents a control allowing selection among a set of options. -}
-select : List Attribute -> List Html -> Html
+{-| Represents a control allowing selection among a set of options.
+-}
+select : Html
 select =
-  node "select"
+  node "select" [] []
 
 
-{-| Represents a set of predefined options for other controls. -}
-datalist : List Attribute -> List Html -> Html
+{-| Represents a set of predefined options for other controls.
+-}
+datalist : Html
 datalist =
-  node "datalist"
+  node "datalist" [] []
 
 
-{-| Represents a set of options, logically grouped. -}
-optgroup : List Attribute -> List Html -> Html
+{-| Represents a set of options, logically grouped.
+-}
+optgroup : Html
 optgroup =
-  node "optgroup"
+  node "optgroup" [] []
 
 
 {-| Represents an option in a `select` element or a suggestion of a `datalist`
 element.
 -}
-option : List Attribute -> List Html -> Html
+option : Html
 option =
-  node "option"
+  node "option" [] []
 
 
-{-| Represents a multiline text edit control. -}
-textarea : List Attribute -> List Html -> Html
+{-| Represents a multiline text edit control.
+-}
+textarea : Html
 textarea =
-  node "textarea"
+  node "textarea" [] []
 
 
-{-| Represents a key-pair generator control. -}
-keygen : List Attribute -> List Html -> Html
+{-| Represents a key-pair generator control.
+-}
+keygen : Html
 keygen =
-  node "keygen"
+  node "keygen" [] []
 
 
-{-| Represents the result of a calculation. -}
-output : List Attribute -> List Html -> Html
+{-| Represents the result of a calculation.
+-}
+output : Html
 output =
-  node "output"
+  node "output" [] []
 
 
-{-| Represents the completion progress of a task. -}
-progress : List Attribute -> List Html -> Html
+{-| Represents the completion progress of a task.
+-}
+progress : Html
 progress =
-  node "progress"
+  node "progress" [] []
 
 
 {-| Represents a scalar measurement (or a fractional value), within a known
 range.
 -}
-meter : List Attribute -> List Html -> Html
+meter : Html
 meter =
-  node "meter"
+  node "meter" [] []
+
 
 
 -- INTERACTIVE ELEMENTS
 
+
 {-| Represents a widget from which the user can obtain additional information
 or controls.
 -}
-details : List Attribute -> List Html -> Html
+details : Html
 details =
-  node "details"
+  node "details" [] []
 
 
-{-| Represents a summary, caption, or legend for a given `details`. -}
-summary : List Attribute -> List Html -> Html
+{-| Represents a summary, caption, or legend for a given `details`.
+-}
+summary : Html
 summary =
-  node "summary"
+  node "summary" [] []
 
 
-{-| Represents a command that the user can invoke. -}
-menuitem : List Attribute -> List Html -> Html
+{-| Represents a command that the user can invoke.
+-}
+menuitem : Html
 menuitem =
-  node "menuitem"
+  node "menuitem" [] []
 
 
-{-| Represents a list of commands. -}
-menu : List Attribute -> List Html -> Html
+{-| Represents a list of commands.
+-}
+menu : Html
 menu =
-  node "menu"
-
+  node "menu" [] []
