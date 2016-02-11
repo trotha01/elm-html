@@ -4,7 +4,7 @@ module Html (..) where
 expect to use frequently will be closer to the top.
 
 # Custom Nodes
-@docs text, node, Html, Attribute, addAttribute, render
+@docs text, node, Html, Attribute, addAttribute, addAttributes, addChild, addChildren, removeAttribute, removeAttributes, isAttribute, render
 
 # Conversions
 @docs toElement
@@ -64,7 +64,7 @@ expect to use frequently will be closer to the top.
 -}
 
 import Graphics.Element exposing (Element)
-import VirtualDom
+import VirtualDom exposing (Property(Property))
 
 
 {-| The core building block used to build up HTML. It is backed by
@@ -109,6 +109,45 @@ addAttribute attr node =
       Text string
 
 
+{-| A method for adding an HTML attributes
+-}
+addAttributes : List Attribute -> Html -> Html
+addAttributes attrs node =
+  List.foldl addAttribute node attrs
+
+
+{-| A method for checking if two attributes have the same key
+-}
+isAttribute : Attribute -> Attribute -> Bool
+isAttribute a1 a2 =
+  case ( a1, a2 ) of
+    ( Property k1 _, Property k2 _ ) ->
+      k1 == k2
+
+
+{-| A method for removing HTML attribute
+-}
+removeAttribute : Attribute -> Html -> Html
+removeAttribute attr node =
+  case node of
+    Node name attrs children ->
+      let
+        filteredAttrs =
+          List.filter (not << (isAttribute attr)) attrs
+      in
+        Node name filteredAttrs children
+
+    Text string ->
+      Text string
+
+
+{-| A method for removing HTML attribute
+-}
+removeAttributes : List Attribute -> Html -> Html
+removeAttributes attrs node =
+  List.foldl removeAttribute node attrs
+
+
 {-| A method for adding an HTML child
 -}
 addChild : Html -> Html -> Html
@@ -121,7 +160,7 @@ addChild child parent =
       Text string
 
 
-{-| A method for adding an HTML children
+{-| A method for adding HTML children
 -}
 addChildren : List Html -> Html -> Html
 addChildren newChildren parent =
