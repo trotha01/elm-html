@@ -63,14 +63,16 @@ expect to use frequently will be closer to the top.
 -}
 
 import Graphics.Element exposing (Element)
-import VirtualDom
+import VirtualDom exposing (Property(Property))
 
 
 {-| The core building block used to build up HTML. It is backed by
 `VirtualDom.Node` in `evancz/virtual-dom` but that is not a super crucial
 detail.
 -}
-type alias Html = VirtualDom.Node
+type Html
+  = Node String (List Attribute) (List Html)
+  | Text String
 
 
 {-| Set attributes on your `Html`.
@@ -88,10 +90,95 @@ functions in this library.
 You can use this to create custom nodes if you need to create something that
 is not covered by the helper functions in this library.
 -}
-node : String -> List Attribute -> List Html -> Html
+node : String -> Html
 node =
-    VirtualDom.node
+    Node [] []
 
+{-| A method for adding an HTML attribute
+-}
+addAttribute : Attribute -> Html -> Html
+addAttribute attr node =
+  case node of
+    Node name attrs children ->
+      (Node name (attr :: attrs) children)
+
+    Text string ->
+      Text string
+
+
+{-| A method for adding an HTML attributes
+-}
+addAttributes : List Attribute -> Html -> Html
+addAttributes attrs node =
+  List.foldl addAttribute node attrs
+
+
+{-| A method for checking if two attributes have the same key
+-}
+isAttribute : Attribute -> Attribute -> Bool
+isAttribute a1 a2 =
+  case ( a1, a2 ) of
+    ( Property k1 _, Property k2 _ ) ->
+      k1 == k2
+
+
+{-| A method for removing HTML attribute
+-}
+removeAttribute : Attribute -> Html -> Html
+removeAttribute attr node =
+  case node of
+    Node name attrs children ->
+      let
+        filteredAttrs =
+          List.filter (not << (isAttribute attr)) attrs
+      in
+        Node name filteredAttrs children
+
+    Text string ->
+      Text string
+
+
+{-| A method for removing HTML attribute
+-}
+removeAttributes : List Attribute -> Html -> Html
+removeAttributes attrs node =
+  List.foldl removeAttribute node attrs
+
+
+{-| A method for adding an HTML child
+-}
+addChild : Html -> Html -> Html
+addChild child parent =
+  case parent of
+    Node name attrs children ->
+      (Node name attrs (List.append children [ child ]))
+
+    Text string ->
+      Text string
+
+
+{-| A method for adding HTML children
+-}
+addChildren : List Html -> Html -> Html
+addChildren newChildren parent =
+  case parent of
+    Node name attrs children ->
+      (Node name attrs (List.append children newChildren))
+
+    Text string ->
+      Text string
+
+
+{-| render must be used once you have constructed your html object
+-}
+render : Html -> VirtualDom.Node
+render html =
+  case html of
+    Node name attributes children ->
+      VirtualDom.node name attributes (List.map render children)
+
+    Text string ->
+      VirtualDom.text string
 
 {-| Just put plain text in the DOM. It will escape the string so that it appears
 exactly as you specify.
@@ -100,24 +187,26 @@ exactly as you specify.
 -}
 text : String -> Html
 text =
-    VirtualDom.text
+    Text
 
 
 {-| Embed HTML in Elements. Useful if your app is written primarily with
 Elements, but you need to switch over to HTML for some small section.
 -}
 toElement : Int -> Int -> Html -> Element
-toElement =
-    VirtualDom.toElement
+toElement w h html =
+    VirtualDom.toElement w h (render html)
 
 
 {-| Embed Elements in HTML. Useful if you have some component written with
 Elements or that uses `collage` that you want to embed in a larger HTML
 component.
 -}
+{- TODO: fix fromElement
 fromElement : Element -> Html
 fromElement =
     VirtualDom.fromElement
+-}
 
 
 -- SECTIONS

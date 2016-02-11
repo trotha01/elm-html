@@ -245,4 +245,4 @@ onSubmit addr msg =
 
 onSubmitOptions : Options
 onSubmitOptions =
-  { defaultOptions | preventDefault <- True }
+  { defaultOptions | preventDefault = True }
